@@ -1,11 +1,21 @@
-const express = require('express');
-const prisma = require('./db'); // Import the instance from step 2
+import express from "express";
+import prisma from "./db.js";
 
 const app = express();
 app.use(express.json());
 
+// Health check - confirms the server and database are both up
+app.get("/health", async (req, res) => {
+  try {
+    const userCount = await prisma.user.count();
+    res.json({ status: "ok", users: userCount });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // GET: Fetch all users
-app.get('/users', async (req, res) => {
+app.get("/users", async (req, res) => {
   try {
     const users = await prisma.user.findMany();
     res.json(users);
@@ -15,11 +25,18 @@ app.get('/users', async (req, res) => {
 });
 
 // POST: Create a new user
-app.post('/users', async (req, res) => {
-  const { email, name } = req.body;
+app.post("/users", async (req, res) => {
+  const username = req.body.username;
+  const email = req.body.email;
+  const password_hash = req.body.password_hash;
+
   try {
     const newUser = await prisma.user.create({
-      data: { email, name },
+      data: {
+        username: username,
+        email: email,
+        password_hash: password_hash,
+      },
     });
     res.status(201).json(newUser);
   } catch (error) {
@@ -29,5 +46,5 @@ app.post('/users', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("Server running on port " + PORT);
 });
