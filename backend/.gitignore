@@ -1,0 +1,10 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Local Environment Secrets
+.env
+
+# Prisma Generated Artifacts
+/prisma/generated-client/
+/generated/prisma
