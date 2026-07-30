@@ -8,3 +8,5 @@ package-lock.json
 # Prisma Generated Artifacts
 /prisma/generated-client/
 /generated/prisma
+
+.DS_Store
