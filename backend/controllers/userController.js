@@ -278,29 +278,3 @@ export const getUserLobbies = async (req, res) => {
     }
 };
 
-export const getUserFriends = async (req, res) => {
-    try {
-        const userId = parseInt(req.user.id);
-
-        // Finds friendships where the user is either the sender OR receiver 
-        // and the status is "accepted"
-        const friendships = await prisma.friendship.findMany({
-            where: {
-                OR: [
-                    { sender_id: userId, status: 'accepted' },
-                    { receiver_id: userId, status: 'accepted' }
-                ]
-            },
-            include: {
-                sender: { select: { id: true, username: true, profile_image_url: true } },
-                receiver: { select: { id: true, username: true, profile_image_url: true } }
-            }
-        });
-
-        res.status(200).json(friendships);
-    } catch (error) {
-        console.error('Error fetching friends:', error);
-        res.status(500).json({ error: 'Internal server error.' });
-    }
-};
-

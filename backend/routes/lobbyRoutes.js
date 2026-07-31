@@ -1,6 +1,6 @@
 import express from 'express';
 import prisma from '../config/dbConfig.js';
-import { mockAuth } from '../middleware/verifyJWT.js';
+import verifyJWT from '../middleware/verifyJWT.js';
 
 const router = express.Router();
 
@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
 });
 
 // CREATE a new lobby
-router.post('/', mockAuth, async (req, res) => {
+router.post('/', verifyJWT, async (req, res) => {
     const userId = req.user.userId;
     const { name } = req.body;
 
@@ -71,7 +71,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // UPDATE a lobby
-router.patch('/:id', mockAuth, async (req, res) => {
+router.patch('/:id', verifyJWT, async (req, res) => {
     const { name, status, chosen_restaurant_id } = req.body;
     // In a real app, you'd want to verify the user is the creator or has permission
     try {
@@ -90,7 +90,7 @@ router.patch('/:id', mockAuth, async (req, res) => {
 });
 
 // DELETE a lobby
-router.delete('/:id', mockAuth, async (req, res) => {
+router.delete('/:id', verifyJWT, async (req, res) => {
     // In a real app, you'd want to verify the user is the creator
     try {
         await prisma.lobby.delete({
@@ -119,7 +119,7 @@ router.get('/:id/members', async (req, res) => {
 });
 
 // ADD a member to a lobby (Join a lobby)
-router.post('/:id/members', mockAuth, async (req, res) => {
+router.post('/:id/members', verifyJWT, async (req, res) => {
     const lobbyId = parseInt(req.params.id);
     const userId = req.user.userId; // User joining is the authenticated user
 
@@ -142,7 +142,7 @@ router.post('/:id/members', mockAuth, async (req, res) => {
 
 
 // REMOVE a member from a lobby (Leave a lobby)
-router.delete('/:id/members/:userId', mockAuth, async (req, res) => {
+router.delete('/:id/members/:userId', verifyJWT, async (req, res) => {
     const lobbyId = parseInt(req.params.id);
     const memberIdToRemove = parseInt(req.params.userId);
 
@@ -185,7 +185,7 @@ router.get('/:id/restaurants', async (req, res) => {
 });
 
 // ADD a restaurant option to a lobby
-router.post('/:id/restaurants', mockAuth, async (req, res) => {
+router.post('/:id/restaurants', verifyJWT, async (req, res) => {
     const lobbyId = parseInt(req.params.id);
     const userId = req.user.userId;
     const { restaurantId } = req.body; // The ID of the restaurant to add
@@ -225,7 +225,7 @@ router.get('/:id/votes', async (req, res) => {
 
 // CAST a vote in a lobby
 // Note: This logic assumes one vote per user per lobby.
-router.post('/:id/votes', mockAuth, async (req, res) => {
+router.post('/:id/votes', verifyJWT, async (req, res) => {
     const lobbyId = parseInt(req.params.id);
     const userId = req.user.userId;
     const { restaurantId } = req.body;
@@ -270,7 +270,7 @@ router.get('/:id/messages', async (req, res) => {
 });
 
 // POST a message to a lobby
-router.post('/:id/messages', mockAuth, async (req, res) => {
+router.post('/:id/messages', verifyJWT, async (req, res) => {
     const lobbyId = parseInt(req.params.id);
     const userId = req.user.userId;
     const { content, imageUrl } = req.body;

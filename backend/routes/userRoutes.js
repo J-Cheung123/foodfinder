@@ -23,6 +23,5 @@ router.delete('/profile/saved-restaurants/:restaurantId', userController.removeS
 
 // User Aggregations (Lobbies & Friends)
 router.get('/profile/lobbies', userController.getUserLobbies);
-router.get('/profile/friends', userController.getUserFriends);
 
 export default router;
