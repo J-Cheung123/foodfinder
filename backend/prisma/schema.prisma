@@ -7,20 +7,37 @@ datasource db {
 }
 
 model User {
-  id                       Int                     @id @default(autoincrement())
-  username                 String                  @unique @db.VarChar(50)
-  email                    String                  @unique @db.VarChar(255)
-  password_hash            String                  @db.VarChar(255)
-  profile_image_url        String?
-  created_at               DateTime                @default(now())
+  id                Int      @id @default(autoincrement())
+  username          String   @unique @db.VarChar(50)
+  email             String   @unique @db.VarChar(255)
+  password_hash     String   @db.VarChar(255)
+  profile_image_url String?
+  created_at        DateTime @default(now())
+
   lobbies_created          Lobby[]
   lobby_memberships        LobbyMember[]
   restaurant_options_added LobbyRestaurantOption[]
   messages                 Message[]
   saved_restaurants        SavedRestaurant[]
   votes                    Vote[]
+  friend_requests_sent     Friendship[]            @relation("SentFriendships")
+  friend_requests_received Friendship[]            @relation("ReceivedFriendships")
 
   @@map("users")
+}
+
+model Friendship {
+  id          Int      @id @default(autoincrement())
+  sender_id   Int
+  receiver_id Int
+  status      String   @default("pending") @db.VarChar(20)
+  created_at  DateTime @default(now())
+
+  sender   User @relation("SentFriendships", fields: [sender_id], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedFriendships", fields: [receiver_id], references: [id], onDelete: Cascade)
+
+  @@unique([sender_id, receiver_id])
+  @@map("friendships")
 }
 
 model Restaurant {
