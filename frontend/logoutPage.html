@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        async function handleLogout() {
+            try {
+                const response = await fetch('http://localhost:3000/users/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include' 
+                });
+
+                // 2. If the server successfully cleared the cookie
+                if (response.ok) {
+                // Clear any non-sensitive data you might have stored locally
+                localStorage.removeItem('userData'); 
+                
+                // Redirect the user back to the login page
+                window.location.href = '/login.html';
+                } else {
+                console.error('Failed to log out on the server.');
+                }
+            } catch (error) {
+                console.error('Network error during logout:', error);
+            }
+            }
+
+        // 3. Attach this function to your logout button
+        document.getElementById('logout-btn').addEventListener('click', function(event) {
+        event.preventDefault();
+        handleLogout();
+        });
+    </script>
+</body>
+</html>

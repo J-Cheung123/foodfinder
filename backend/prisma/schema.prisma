@@ -41,16 +41,17 @@ model Friendship {
 }
 
 model Restaurant {
-  id                Int                     @id @default(autoincrement())
-  api_place_id      String                  @unique @db.VarChar(255)
-  name              String                  @db.VarChar(255)
-  address           String?
-  latitude          Decimal?                @db.Decimal(9, 6)
-  longitude         Decimal?                @db.Decimal(9, 6)
-  rating            Decimal?                @db.Decimal(2, 1)
-  price_level       Int?
-  photo_url         String?
-  cached_at         DateTime                @default(now())
+  id           Int      @id @default(autoincrement())
+  api_place_id String   @unique @db.VarChar(255)
+  name         String   @db.VarChar(255)
+  address      String?
+  latitude     Decimal? @db.Decimal(9, 6)
+  longitude    Decimal? @db.Decimal(9, 6)
+  rating       Decimal? @db.Decimal(2, 1)
+  price_level  Int?
+  photo_url    String?
+  cached_at    DateTime @default(now())
+
   chosen_by_lobbies Lobby[]
   lobby_options     LobbyRestaurantOption[]
   saved_by          SavedRestaurant[]
@@ -60,32 +61,34 @@ model Restaurant {
 }
 
 model SavedRestaurant {
-  id            Int        @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   user_id       Int
   restaurant_id Int
-  saved_at      DateTime   @default(now())
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-  user          User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  saved_at      DateTime @default(now())
+
+  restaurant Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, restaurant_id])
   @@map("saved_restaurants")
 }
 
 model Lobby {
-  id                   Int                     @id @default(autoincrement())
-  name                 String?                 @db.VarChar(100)
+  id                   Int       @id @default(autoincrement())
+  name                 String?   @db.VarChar(100)
   created_by           Int
-  status               String                  @default("active") @db.VarChar(20)
+  status               String    @default("active") @db.VarChar(20)
   chosen_restaurant_id Int?
-  invite_code          String?                 @unique @db.VarChar(10)
-  created_at           DateTime                @default(now())
+  invite_code          String?   @unique @db.VarChar(10)
+  created_at           DateTime  @default(now())
   closed_at            DateTime?
-  chosen_restaurant    Restaurant?             @relation(fields: [chosen_restaurant_id], references: [id])
-  creator              User                    @relation(fields: [created_by], references: [id])
-  members              LobbyMember[]
-  restaurant_options   LobbyRestaurantOption[]
-  messages             Message[]
-  votes                Vote[]
+
+  chosen_restaurant  Restaurant?             @relation(fields: [chosen_restaurant_id], references: [id])
+  creator            User                    @relation(fields: [created_by], references: [id])
+  members            LobbyMember[]
+  restaurant_options LobbyRestaurantOption[]
+  messages           Message[]
+  votes              Vote[]
 
   @@map("lobbies")
 }
@@ -95,35 +98,38 @@ model LobbyMember {
   lobby_id  Int
   user_id   Int
   joined_at DateTime @default(now())
-  lobby     Lobby    @relation(fields: [lobby_id], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  lobby Lobby @relation(fields: [lobby_id], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([lobby_id, user_id])
   @@map("lobby_members")
 }
 
 model LobbyRestaurantOption {
-  id            Int        @id @default(autoincrement())
+  id            Int @id @default(autoincrement())
   lobby_id      Int
   restaurant_id Int
   added_by      Int
-  adder         User       @relation(fields: [added_by], references: [id])
-  lobby         Lobby      @relation(fields: [lobby_id], references: [id], onDelete: Cascade)
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+
+  adder      User       @relation(fields: [added_by], references: [id])
+  lobby      Lobby      @relation(fields: [lobby_id], references: [id], onDelete: Cascade)
+  restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
 
   @@unique([lobby_id, restaurant_id])
   @@map("lobby_restaurant_options")
 }
 
 model Vote {
-  id            Int        @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   lobby_id      Int
   user_id       Int
   restaurant_id Int
-  voted_at      DateTime   @default(now())
-  lobby         Lobby      @relation(fields: [lobby_id], references: [id], onDelete: Cascade)
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
-  user          User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  voted_at      DateTime @default(now())
+
+  lobby      Lobby      @relation(fields: [lobby_id], references: [id], onDelete: Cascade)
+  restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
+  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([lobby_id, user_id])
   @@map("votes")
@@ -136,8 +142,9 @@ model Message {
   content   String?
   image_url String?
   sent_at   DateTime @default(now())
-  lobby     Lobby    @relation(fields: [lobby_id], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  lobby Lobby @relation(fields: [lobby_id], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("messages")
 }

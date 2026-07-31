@@ -1,6 +1,6 @@
 import express from 'express';
 import prisma from '../config/dbConfig.js';
-import { mockAuth } from '../middleware/auth.js';
+import { mockAuth } from '../middleware/verifyJWT.js';
 
 const router = express.Router();
 
