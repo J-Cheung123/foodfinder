@@ -1,50 +1,37 @@
-import express from "express";
-import prisma from "./db.js";
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import lobbyRoutes from './routes/lobbyRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import restaurantRoutes from './routes/restaurantRoutes.js';
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
+
+app.use(express.static(path.join(__dirname, '../frontend'))); // Defaults static HTML pages to frontend directory instead of (public)
 app.use(express.json());
+app.use(cookieParser());
 
-// Health check - confirms the server and database are both up
-app.get("/health", async (req, res) => {
-  try {
-    const userCount = await prisma.user.count();
-    res.json({ status: "ok", users: userCount });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// API Routes
+app.use('/api/lobbies', lobbyRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/restaurants', restaurantRoutes);
 
-// GET: Fetch all users
-app.get("/users", async (req, res) => {
-  try {
-    const users = await prisma.user.findMany();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// POST: Create a new user
-app.post("/users", async (req, res) => {
-  const username = req.body.username;
-  const email = req.body.email;
-  const password_hash = req.body.password_hash;
-
-  try {
-    const newUser = await prisma.user.create({
-      data: {
-        username: username,
-        email: email,
-        password_hash: password_hash,
-      },
-    });
-    res.status(201).json(newUser);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+app.get('/', (req, res) => {
+  res.send('Food Finder API is running!');
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
