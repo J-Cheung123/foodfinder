@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 // frontend/JavaScripts/dashboard.js
 
+=======
+>>>>>>> 0d0d44c7c3e2025f66a6e27d6935d18f421f7a4a
 // Change this to your live domain when you deploy!
 const API_BASE_URL = 'http://localhost:3000';
 
@@ -14,8 +17,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             if (!response.ok) {
+<<<<<<< HEAD
                 // If the HttpOnly cookie is missing or invalid, redirect to login via replace
                 window.location.replace('/login.html');
+=======
+                // If the HttpOnly cookie is missing or invalid, redirect to login
+                window.location.href = '/login.html';
+>>>>>>> 0d0d44c7c3e2025f66a6e27d6935d18f421f7a4a
                 return;
             }
 
@@ -89,7 +97,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 method: 'POST',
                 credentials: 'include'
             });
+<<<<<<< HEAD
             window.location.replace('/login.html');
+=======
+            window.location.href = '/login.html';
+>>>>>>> 0d0d44c7c3e2025f66a6e27d6935d18f421f7a4a
         } catch (error) {
             console.error('Logout failed', error);
         }

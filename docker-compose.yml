@@ -1,0 +1,18 @@
+services:
+  backend:
+    image: food-finder-backend
+    container_name: food-finder-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - 80:8000
+
+  frontend:
+    image: food-finder-frontend
+    container_name: food-finder-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
