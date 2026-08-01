@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:3000';
+// Change this manually to 'https://api.yourdomain.com' only when deploying to the cloud.
+const API_BASE_URL = 'http://localhost:5000';
+
 
 document.addEventListener('DOMContentLoaded', async () => {
 

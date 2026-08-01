@@ -12,13 +12,23 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const getCorsOrigin = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.FRONTEND_URL; // e.g., 'https://my-live-website.com'
+  }
+  return 'http://localhost:3000';
+};
 
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: getCorsOrigin(),
+  credentials: true // Crucial for your JWT cookies to work
+}));
+
+app.use(cors({
+  origin: getCorsOrigin(),
   credentials: true
 }));
 
-app.use(express.static(path.join(__dirname, '../frontend'))); // Defaults static HTML pages to frontend directory instead of (public)
 app.use(express.json());
 app.use(cookieParser());
 
@@ -31,7 +41,9 @@ app.get('/', (req, res) => {
   res.send('Food Finder API is running!');
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+const PORT = process.env.PORT || 5000;
+const HOST = process.env.HOST || '0.0.0.0';
+
+app.listen(PORT, HOST, () => {
+  console.log(`Server is running on http://${HOST}:${PORT}`);
 });

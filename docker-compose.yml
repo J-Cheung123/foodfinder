@@ -1,3 +1,4 @@
+# Use "docker compose up -d --build" for production command
 services:
   backend:
     image: food-finder-backend
@@ -6,8 +7,20 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - 80:8000
-
+      - 5000:5000
+    env_file:
+      - ./backend/.env
+    # Use "docker compose watch" for local development
+    develop:
+      watch:
+        # Rebuilds when package is changed
+        - path: ./backend/package.json
+          action: rebuild
+        # Sync and restart server inside the container without rebuilding
+        - path: ./backend
+          target: /app
+          action: sync+restart
+    
   frontend:
     image: food-finder-frontend
     container_name: food-finder-frontend
@@ -15,4 +28,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - 80:80
+      - 3000:80
+    # Use "docker compose watch" for local development
+    develop:
+      watch:
+        # Instantly syncs HTML/CSS/JS without restarting Nginx
+        - path: ./frontend
+          target: /usr/share/nginx/html # The default Nginx serving directory
+          action: sync
