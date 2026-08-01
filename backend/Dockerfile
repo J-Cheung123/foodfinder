@@ -1,12 +1,13 @@
-# Use a Node image
 FROM node:22-alpine
 
-# Set the working directory
+ENV NODE_ENV=production
+
 WORKDIR /app
 
-# Copy package files FIRST
 COPY package.json package-lock.json ./
-RUN npm install
+
+# This guarantees deterministic builds using exactly what is in package-lock.json
+RUN npm ci
 
 # Copy the rest of your backend code (including prisma folder)
 COPY . .
@@ -14,8 +15,9 @@ COPY . .
 # Generate the Prisma client INSIDE the Linux container
 RUN npx prisma generate
 
-# Expose your Express port
-EXPOSE 3000
+# This ensures the app runs as a restricted user, limiting damage if breached
+USER node
 
-# Start the server
+EXPOSE 5000
+
 CMD ["npm", "start"]
