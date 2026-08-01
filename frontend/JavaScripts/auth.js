@@ -1,12 +1,6 @@
-<<<<<<< HEAD
-// frontend/JavaScripts/auth.js
-
-// Change this to your live domain when you deploy!
 const API_BASE_URL = 'http://localhost:3000';
 
 document.addEventListener('DOMContentLoaded', async () => {
-
-    // 1. AUTO-REDIRECT: If already logged in, bounce to dashboard
     try {
         const checkAuth = await fetch(`${API_BASE_URL}/api/users/profile`, {
             method: 'GET',
@@ -21,9 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Just fail silently and let them log in
     }
 
-=======
-document.addEventListener('DOMContentLoaded', () => {
->>>>>>> 0d0d44c7c3e2025f66a6e27d6935d18f421f7a4a
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     const authError = document.getElementById('auth-error');
@@ -48,34 +39,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('login-password').value;
 
         try {
-<<<<<<< HEAD
             const response = await fetch(`${API_BASE_URL}/api/users/login`, {
-=======
-            const response = await fetch('/api/users/login', {
->>>>>>> 0d0d44c7c3e2025f66a6e27d6935d18f421f7a4a
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: identifier.includes('@') ? identifier : undefined,
                     username: !identifier.includes('@') ? identifier : undefined,
                     password
-<<<<<<< HEAD
                 }),
                 credentials: 'include' // Make sure cookies are allowed!
-=======
-                })
->>>>>>> 0d0d44c7c3e2025f66a6e27d6935d18f421f7a4a
             });
 
             const data = await response.json();
             if (response.ok) {
-<<<<<<< HEAD
                 // USE REPLACE INSTEAD OF HREF
                 window.location.replace('/index.html');
-=======
-                // The HttpOnly cookie is set automatically by the browser!
-                window.location.href = '/index.html';
->>>>>>> 0d0d44c7c3e2025f66a6e27d6935d18f421f7a4a
             } else {
                 authError.textContent = data.error || 'Login failed';
             }
@@ -92,18 +70,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('register-password').value;
 
         try {
-<<<<<<< HEAD
             const response = await fetch(`${API_BASE_URL}/api/users/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password }),
                 credentials: 'include'
-=======
-            const response = await fetch('/api/users/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password })
->>>>>>> 0d0d44c7c3e2025f66a6e27d6935d18f421f7a4a
             });
 
             const data = await response.json();
