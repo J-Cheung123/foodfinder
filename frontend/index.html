@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>FoodFinder - Dashboard</title>
+</head>
+<body>
+    <div class="dashboard-layout" style="display: flex;">
+        
+        <!-- Sidebar: Profile & Controls -->
+        <aside style="width: 250px; padding: 20px; border-right: 1px solid #ccc;">
+            <div id="user-profile">
+                <h3 id="display-username">Loading...</h3>
+                <p id="display-email"></p>
+                <button id="logout-btn">Log Out</button>
+            </div>
+            <hr>
+            <div>
+                <h4>Create a Lobby</h4>
+                <!-- This will be wired up later when lobbyRoutes are active -->
+                <button disabled>New Lobby (Coming Soon)</button> 
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main style="flex: 1; padding: 20px;">
+            <h2>Your Dashboard</h2>
+
+            <section id="saved-restaurants-section">
+                <h3>Saved Restaurants</h3>
+                <ul id="saved-list">
+                    <!-- Populated by JS -->
+                </ul>
+            </section>
+
+            <section id="lobby-history-section" style="margin-top: 40px;">
+                <h3>Your Lobbies</h3>
+                <ul id="lobby-list">
+                    <!-- Populated by JS -->
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modular JS for Dashboard Data -->
+    <script src="/JavaScripts/dashboard.js"></script>
+</body>
+</html>
