@@ -4,6 +4,7 @@ pipeline {
     stages {
         stage('Clean Workspace') {
             steps {
+                echo 'Cleaning workspace and checking out fresh code...'
                 deleteDir()
                 checkout scm
             }
@@ -18,10 +19,6 @@ pipeline {
         
         stage('Setup Environment') {
             steps {
-                echo 'Cleaning up old locked secrets and fixing permissions...'
-                sh 'rm -f ./backend/.env || true' 
-                sh 'chmod u+w ./backend || true'
-
                 echo 'Injecting secrets securely...'
                 withCredentials([file(credentialsId: 'Database and JWT', variable: 'SECRET_ENV')]) {
                     sh 'cp $SECRET_ENV ./backend/.env'
