@@ -2,15 +2,7 @@ pipeline {
     agent any 
 
     stages {
-        stage('Clean Workspace') {
-            steps {
-                echo 'Cleaning workspace and checking out fresh code...'
-                deleteDir()
-                checkout scm
-            }
-        }
-
-        stage('Pull Codes') {
+        stage('Check Pulled Codes') {
             steps { 
                 sh 'echo "Your current files:"'
                 sh 'ls -a'
