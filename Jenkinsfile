@@ -8,6 +8,19 @@ pipeline {
                 sh 'ls -a'
             }
         }
+
+        stage('Lint') {
+            steps {
+                dir('backend') {
+                    sh 'npm install'
+                    sh 'npx eslint .'
+                }
+                dir('frontend') {
+                    sh 'npm install'
+                    sh 'npx eslint .'
+                }
+            }
+        }
         
         stage('Setup Environment') {
             steps {
@@ -63,6 +76,9 @@ pipeline {
             echo 'Build failed! Sending notification and logs...'
             withCredentials([string(credentialsId: 'discord-webhook', variable: 'DISCORD_URL')]) {
                 sh '''
+                    # Guarantee the log file exists even if failure happened before Build Images ran
+                    touch backend_error_logs.txt
+
                     # Use -F to send both a JSON message and a file attachment
                     curl -F "payload_json={\\"content\\": \\"❌ **FAILED:** Food-Finder pipeline encountered an error.\\\\n📊 [View Pipeline](${BUILD_URL})\\\\n📜 [View Full Console](${BUILD_URL}console)\\"}" \
                          -F "file1=@backend_error_logs.txt" \
