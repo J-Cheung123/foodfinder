@@ -13,7 +13,7 @@ pipeline {
             steps {
                 echo 'Injecting secrets securely...'
                 withCredentials([file(credentialsId: 'Database and JWT', variable: 'SECRET_ENV')]) {
-                    sh 'cp $SECRET_ENV ./backend/.env'
+                    sh 'cp "$SECRET_ENV" ./backend/.env'
                 }
             }
         }
