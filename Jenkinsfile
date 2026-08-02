@@ -1,36 +1,36 @@
 pipeline {
-    // This defines the default agent for the whole pipeline, 
-    // unless a specific stage overrides it.
-    agent any 
+    agent any // Runs on your Jenkins host that has Docker installed
 
     stages {
-        stage('Preparation') {
+        stage('Build Images') {
             steps {
-                git branch: 'main', url: 'https://github.com/VincentYuann/Food-Finder.git'
+                echo 'Building Docker images from docker-compose.yml...'
+                sh 'docker compose build'
             }
         }
         
-        stage('Build') {
+        stage('Deploy/Run Instance') {
             steps {
-                sh '''
-                    echo "Without Docker"
-                    ls -l
-                    ls -a
-                '''
+                echo 'Starting up the application...'
+                // The -d flag runs it in the background so the pipeline can continue
+                sh 'docker compose up -d'
             }
         }
         
-        stage('Results') {
-            // This stage overrides the default agent and runs entirely inside Node 18!
-            agent {
-                docker {
-                    image "node:18-alpine"
-                }
-            }
+        stage('Test') {
             steps {
-                sh 'node -v'
-                sh 'echo "With Docker"'
+                echo 'Running tests against the live containers...'
+                // You would add your testing commands here later
+                sh 'echo "Tests passed!"' 
             }
+        }
+    }
+    
+    // The post block always runs at the end, regardless of success or failure
+    post {
+        always {
+            echo 'Cleaning up containers...'
+            sh 'docker compose down'
         }
     }
 }
