@@ -9,7 +9,7 @@ export default [
                 ...globals.node
             },
             ecmaVersion: "latest",
-            sourceType: "commonjs"
+            sourceType: "module"
         },
         rules: {
             "no-unused-vars": "warn",
