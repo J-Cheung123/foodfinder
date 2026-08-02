@@ -1,14 +1,16 @@
 pipeline {
     agent any 
 
-    environment {
-        DISCORD_URL='https://discord.com/api/webhooks/1533506966146515105/WhoICSV8HJblqeGaizplrmDSGSxHIAhqZHiIHsAyUygnfavyn7y9wUwY_g8kQso6iWYW'
-    }
-
     stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir() 
+            }
+        }
+
         stage('Pull Codes') {
             steps { 
-                sh 'echo "Your current files"'
+                sh 'echo "Your current files:"'
                 sh 'ls -a'
             }
         }
@@ -46,7 +48,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running tests against the live containers...'
-                // You would add your testing commands here later
+                // Add tests later
                 sh 'echo "Tests passed!"' 
             }
         }
