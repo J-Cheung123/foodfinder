@@ -1,6 +1,10 @@
 pipeline {
     agent any 
 
+    environment {
+        DISCORD_URL='https://discord.com/api/webhooks/1533506966146515105/WhoICSV8HJblqeGaizplrmDSGSxHIAhqZHiIHsAyUygnfavyn7y9wUwY_g8kQso6iWYW'
+    }
+
     stages {
         stage('Pull Codes') {
             steps { 
@@ -52,9 +56,29 @@ pipeline {
         always {
             sh '''
                 echo "Cleaning up containers..."
-                docker compose down
-                rm -f ./backend/.env
+                docker compose down || true
+                rm -f ./backend/.env || true
             '''
+        }
+        success {
+            echo 'Build succeeded! Sending notification...'
+            withCredentials([string(credentialsId: 'discord-webhook', variable: 'DISCORD_URL')]) {
+                sh '''
+                    curl -H "Content-Type: application/json" \
+                    -d '{"content": "✅ **SUCCESS:** Food-Finder pipeline just passed and deployed successfully!"}' \
+                    $DISCORD_URL
+                '''
+            }
+        }
+        failure {
+            echo 'Build failed! Sending notification...'
+            withCredentials([string(credentialsId: 'discord-webhook', variable: 'DISCORD_URL')]) {
+                sh '''
+                    curl -H "Content-Type: application/json" \
+                    -d '{"content": "❌ **FAILED:** Food-Finder pipeline encountered an error. Check Jenkins logs."}' \
+                    $DISCORD_URL
+                '''
+            }
         }
     }
 }
