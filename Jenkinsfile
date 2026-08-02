@@ -10,6 +10,13 @@ pipeline {
         }
 
         stage('Lint') {
+            agent {
+                docker {
+                    image 'node:24-alpine'
+                    reuseNode true
+                }
+            }
+
             steps {
                 dir('backend') {
                     sh 'npm install'
