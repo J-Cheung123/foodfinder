@@ -24,11 +24,7 @@ app.use(cors({
   credentials: true // Crucial for your JWT cookies to work
 }));
 
-app.use(cors({
-  origin: getCorsOrigin(),
-  credentials: true
-}));
-
+app.use(express.static(path.join(__dirname, '../frontend')));
 app.use(express.json());
 app.use(cookieParser());
 
