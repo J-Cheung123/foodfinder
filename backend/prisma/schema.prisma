@@ -1,3 +1,8 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -6,6 +11,9 @@ datasource db {
   provider = "postgresql"
 }
 
+// ============================
+// USERS
+// ============================
 model User {
   id                Int      @id @default(autoincrement())
   username          String   @unique @db.VarChar(50)
@@ -14,16 +22,21 @@ model User {
   profile_image_url String?
   created_at        DateTime @default(now())
 
+  saved_restaurants        SavedRestaurant[]
   lobbies_created          Lobby[]
   lobby_memberships        LobbyMember[]
   restaurant_options_added LobbyRestaurantOption[]
-  messages                 Message[]
-  saved_restaurants        SavedRestaurant[]
   votes                    Vote[]
+  messages                 Message[]
 
   @@map("users")
 }
 
+// ============================
+// RESTAURANTS
+// Cached info pulled from Google Places / Yelp so you're not
+// re-fetching the API every time.
+// ============================
 model Restaurant {
   id           Int      @id @default(autoincrement())
   api_place_id String   @unique @db.VarChar(255)
@@ -36,47 +49,57 @@ model Restaurant {
   photo_url    String?
   cached_at    DateTime @default(now())
 
+  saved_by          SavedRestaurant[]
   chosen_by_lobbies Lobby[]
   lobby_options     LobbyRestaurantOption[]
-  saved_by          SavedRestaurant[]
   votes             Vote[]
 
   @@map("restaurants")
 }
 
+// ============================
+// SAVED RESTAURANTS (user's personal list)
+// ============================
 model SavedRestaurant {
   id            Int      @id @default(autoincrement())
   user_id       Int
   restaurant_id Int
   saved_at      DateTime @default(now())
 
-  restaurant Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
   user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  restaurant Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, restaurant_id])
   @@map("saved_restaurants")
 }
 
+// ============================
+// LOBBIES
+// ============================
 model Lobby {
   id                   Int       @id @default(autoincrement())
   name                 String?   @db.VarChar(100)
   created_by           Int
-  status               String    @default("active") @db.VarChar(20)
+  status               String    @default("active") @db.VarChar(20) // active | voting | eating | closed
   chosen_restaurant_id Int?
   invite_code          String?   @unique @db.VarChar(10)
   created_at           DateTime  @default(now())
   closed_at            DateTime?
 
-  chosen_restaurant  Restaurant?             @relation(fields: [chosen_restaurant_id], references: [id])
-  creator            User                    @relation(fields: [created_by], references: [id])
+  creator           User        @relation(fields: [created_by], references: [id])
+  chosen_restaurant Restaurant? @relation(fields: [chosen_restaurant_id], references: [id])
+
   members            LobbyMember[]
   restaurant_options LobbyRestaurantOption[]
-  messages           Message[]
   votes              Vote[]
+  messages           Message[]
 
   @@map("lobbies")
 }
 
+// ============================
+// LOBBY MEMBERS
+// ============================
 model LobbyMember {
   id        Int      @id @default(autoincrement())
   lobby_id  Int
@@ -90,20 +113,26 @@ model LobbyMember {
   @@map("lobby_members")
 }
 
+// ============================
+// LOBBY RESTAURANT OPTIONS (the shortlist to vote on)
+// ============================
 model LobbyRestaurantOption {
   id            Int @id @default(autoincrement())
   lobby_id      Int
   restaurant_id Int
   added_by      Int
 
-  adder      User       @relation(fields: [added_by], references: [id])
   lobby      Lobby      @relation(fields: [lobby_id], references: [id], onDelete: Cascade)
   restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
+  adder      User       @relation(fields: [added_by], references: [id])
 
   @@unique([lobby_id, restaurant_id])
   @@map("lobby_restaurant_options")
 }
 
+// ============================
+// VOTES
+// ============================
 model Vote {
   id            Int      @id @default(autoincrement())
   lobby_id      Int
@@ -112,18 +141,21 @@ model Vote {
   voted_at      DateTime @default(now())
 
   lobby      Lobby      @relation(fields: [lobby_id], references: [id], onDelete: Cascade)
-  restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
   user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  restaurant Restaurant @relation(fields: [restaurant_id], references: [id])
 
-  @@unique([lobby_id, user_id])
+  @@unique([lobby_id, user_id]) // one vote per person per lobby
   @@map("votes")
 }
 
+// ============================
+// MESSAGES (lobby chat)
+// ============================
 model Message {
   id        Int      @id @default(autoincrement())
   lobby_id  Int
-  user_id   Int[]
-  content   String
+  user_id   Int
+  content   String? // nullable if it's an image-only message
   image_url String?
   sent_at   DateTime @default(now())
 
