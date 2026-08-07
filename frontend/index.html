@@ -15,11 +15,18 @@
                 <p id="display-email"></p>
                 <button id="logout-btn">Log Out</button>
             </div>
-            <hr>
+            <hr style="margin: 20px 0;">
+            
+            <!-- NEW: Link to the Search page -->
+            <div style="margin-bottom: 20px;">
+                <h4>Discover</h4>
+                <a href="/search.html" style="display: inline-block; padding: 10px 15px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; margin-top: 10px; font-size: 14px;">🔍 Search Restaurants</a>
+            </div>
+
             <div>
                 <h4>Create a Lobby</h4>
                 <!-- This will be wired up later when lobbyRoutes are active -->
-                <button disabled>New Lobby (Coming Soon)</button> 
+                <button disabled style="margin-top: 10px; padding: 10px;">New Lobby (Coming Soon)</button> 
             </div>
         </aside>
 
@@ -27,7 +34,7 @@
         <main style="flex: 1; padding: 20px;">
             <h2>Your Dashboard</h2>
 
-            <section id="saved-restaurants-section">
+            <section id="saved-restaurants-section" style="margin-top: 20px;">
                 <h3>Saved Restaurants</h3>
                 <ul id="saved-list">
                     <!-- Populated by JS -->

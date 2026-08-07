@@ -1,7 +1,25 @@
 import axios from 'axios';
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
-const GOOGLE_PLACES_BASE_URL = 'https://maps.googleapis.com/maps/api/place';
+
+// OPTIMIZATION: Create an Axios instance to automatically attach the base URL and API Key
+const placesClient = axios.create({
+    baseURL: 'https://maps.googleapis.com/maps/api/place',
+    params: {
+        key: GOOGLE_PLACES_API_KEY
+    }
+});
+
+/**
+ * Generate a URL for a Google Places photo
+ * @param {string} photoReference - Photo reference from Google Places API
+ * @param {number} maxWidth - Maximum width of the image (default 400)
+ * @returns {string} - Full photo URL
+ */
+function getPhotoUrl(photoReference, maxWidth = 400) {
+    // Note: We have to pass the key manually here since this generates a raw string URL for the frontend, not an Axios call
+    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${maxWidth}&photo_reference=${photoReference}&key=${GOOGLE_PLACES_API_KEY}`;
+}
 
 /**
  * Search for restaurants near a location using Google Places API
@@ -13,9 +31,8 @@ const GOOGLE_PLACES_BASE_URL = 'https://maps.googleapis.com/maps/api/place';
  */
 export async function searchNearbyRestaurants(latitude, longitude, radiusMeters = 1500, keyword = 'restaurant') {
     try {
-        const response = await axios.get(`${GOOGLE_PLACES_BASE_URL}/nearbysearch/json`, {
+        const response = await placesClient.get('/nearbysearch/json', {
             params: {
-                key: GOOGLE_PLACES_API_KEY,
                 location: `${latitude},${longitude}`,
                 radius: radiusMeters,
                 type: 'restaurant',
@@ -27,22 +44,65 @@ export async function searchNearbyRestaurants(latitude, longitude, radiusMeters 
             throw new Error(`Google Places API error: ${response.data.status}`);
         }
 
-        // Map Google Places results to Restaurant schema
         return response.data.results.map(place => ({
             api_place_id: place.place_id,
             name: place.name,
             address: place.vicinity,
             latitude: place.geometry.location.lat,
             longitude: place.geometry.location.lng,
-            rating: place.rating || null,
-            price_level: place.price_level || null,
-            photo_url: place.photos?.[0]?.photo_reference ? 
+            // FIX: Use ?? instead of || so a price_level or rating of 0 isn't wiped out
+            rating: place.rating ?? null,
+            price_level: place.price_level ?? null,
+            photo_url: place.photos?.[0]?.photo_reference ?
                 getPhotoUrl(place.photos[0].photo_reference) : null,
-            is_open: place.opening_hours?.open_now || null,
+            is_open: place.opening_hours?.open_now ?? null,
             types: place.types || []
         }));
     } catch (error) {
         console.error('Google Places search error:', error.message);
+        throw error;
+    }
+}
+
+/**
+ * Text search for restaurants
+ * @param {string} query - Search query (e.g., "sushi in San Francisco")
+ * @param {number} latitude - Optional: latitude for location bias
+ * @param {number} longitude - Optional: longitude for location bias
+ * @returns {Promise<Array>} - Array of search results
+ */
+export async function textSearchRestaurants(query, latitude = null, longitude = null) {
+    try {
+        const params = {
+            query: query,
+            type: 'restaurant'
+        };
+
+        if (latitude && longitude) {
+            params.location = `${latitude},${longitude}`;
+        }
+
+        const response = await placesClient.get('/textsearch/json', { params });
+
+        if (response.data.status !== 'OK' && response.data.status !== 'ZERO_RESULTS') {
+            throw new Error(`Google Places API error: ${response.data.status}`);
+        }
+
+        return response.data.results.map(place => ({
+            api_place_id: place.place_id,
+            name: place.name,
+            address: place.formatted_address,
+            latitude: place.geometry.location.lat,
+            longitude: place.geometry.location.lng,
+            rating: place.rating ?? null,
+            price_level: place.price_level ?? null,
+            photo_url: place.photos?.[0]?.photo_reference ?
+                getPhotoUrl(place.photos[0].photo_reference) : null,
+            is_open: place.opening_hours?.open_now ?? null,
+            types: place.types || [] // FIX: Added types here to match nearbySearch schema
+        }));
+    } catch (error) {
+        console.error('Google Places text search error:', error.message);
         throw error;
     }
 }
@@ -54,9 +114,8 @@ export async function searchNearbyRestaurants(latitude, longitude, radiusMeters 
  */
 export async function getRestaurantDetails(placeId) {
     try {
-        const response = await axios.get(`${GOOGLE_PLACES_BASE_URL}/details/json`, {
+        const response = await placesClient.get('/details/json', {
             params: {
-                key: GOOGLE_PLACES_API_KEY,
                 place_id: placeId,
                 fields: 'place_id,name,formatted_address,geometry,rating,price_level,photos,opening_hours,website,formatted_phone_number,reviews'
             }
@@ -73,9 +132,9 @@ export async function getRestaurantDetails(placeId) {
             address: place.formatted_address,
             latitude: place.geometry.location.lat,
             longitude: place.geometry.location.lng,
-            rating: place.rating || null,
-            price_level: place.price_level || null,
-            photo_url: place.photos?.[0]?.photo_reference ? 
+            rating: place.rating ?? null,
+            price_level: place.price_level ?? null,
+            photo_url: place.photos?.[0]?.photo_reference ?
                 getPhotoUrl(place.photos[0].photo_reference) : null,
             website: place.website || null,
             phone: place.formatted_phone_number || null,
@@ -84,61 +143,6 @@ export async function getRestaurantDetails(placeId) {
         };
     } catch (error) {
         console.error('Google Places details error:', error.message);
-        throw error;
-    }
-}
-
-/**
- * Generate a URL for a Google Places photo
- * @param {string} photoReference - Photo reference from Google Places API
- * @returns {string} - Full photo URL
- */
-function getPhotoUrl(photoReference) {
-    return `${GOOGLE_PLACES_BASE_URL}/photo?maxwidth=400&photo_reference=${photoReference}&key=${GOOGLE_PLACES_API_KEY}`;
-}
-
-/**
- * Text search for restaurants
- * @param {string} query - Search query (e.g., "sushi in San Francisco")
- * @param {number} latitude - Optional: latitude for location bias
- * @param {number} longitude - Optional: longitude for location bias
- * @returns {Promise<Array>} - Array of search results
- */
-export async function textSearchRestaurants(query, latitude = null, longitude = null) {
-    try {
-        const params = {
-            key: GOOGLE_PLACES_API_KEY,
-            query: query,
-            type: 'restaurant'
-        };
-
-        // Add location bias if coordinates provided
-        if (latitude && longitude) {
-            params.location = `${latitude},${longitude}`;
-        }
-
-        const response = await axios.get(`${GOOGLE_PLACES_BASE_URL}/textsearch/json`, {
-            params
-        });
-
-        if (response.data.status !== 'OK' && response.data.status !== 'ZERO_RESULTS') {
-            throw new Error(`Google Places API error: ${response.data.status}`);
-        }
-
-        return response.data.results.map(place => ({
-            api_place_id: place.place_id,
-            name: place.name,
-            address: place.formatted_address,
-            latitude: place.geometry.location.lat,
-            longitude: place.geometry.location.lng,
-            rating: place.rating || null,
-            price_level: place.price_level || null,
-            photo_url: place.photos?.[0]?.photo_reference ? 
-                getPhotoUrl(place.photos[0].photo_reference) : null,
-            is_open: place.opening_hours?.open_now || null,
-        }));
-    } catch (error) {
-        console.error('Google Places text search error:', error.message);
         throw error;
     }
 }

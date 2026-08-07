@@ -33,14 +33,17 @@ function formatAddress(address) {
 
 function renderRestaurantCard(restaurant) {
     const isSaved = searchResults.find(r => r.api_place_id === restaurant.api_place_id)?.saved || false;
-    
+
+    // Using &quot; prevents the HTML attribute from breaking
+    const fallbackHTML = `<div class=&quot;no-image&quot;>📷 No photo available</div>`;
+
     return `
         <div class="restaurant-card">
             <div class="restaurant-image">
-                ${restaurant.photo_url 
-                    ? `<img src="${restaurant.photo_url}" alt="${restaurant.name}" onerror="this.parentElement.innerHTML='<div class=\'no-image\'>No image available</div>'"/>` 
-                    : `<div class="no-image">📷 No photo available</div>`
-                }
+                ${restaurant.photo_url
+            ? `<img src="${restaurant.photo_url}" alt="${restaurant.name}" onerror="this.parentElement.innerHTML='${fallbackHTML}'"/>`
+            : `<div class="no-image">📷 No photo available</div>`
+        }
             </div>
             <div class="restaurant-info">
                 <div class="restaurant-name">${restaurant.name}</div>
@@ -179,7 +182,7 @@ async function searchByName() {
     try {
         const url = new URL(`${API_BASE_URL}/api/restaurants/search/text`);
         url.searchParams.append('query', query);
-        
+
         if (currentLocation) {
             url.searchParams.append('latitude', currentLocation.latitude);
             url.searchParams.append('longitude', currentLocation.longitude);
